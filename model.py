@@ -13,20 +13,16 @@ class Model:
         for layer in reversed(self.layers):
             dLoss = layer.backward(dLoss)
 
-    def train(self, X, Y, epochs=1000):
-        for epoch in range(epochs):
-            Y_hat = self.forward(X)
-            loss = self.loss.forward(Y_hat, Y)
-            dLoss = self.loss.backward()
-            self.backward(dLoss)
+    def step(self):
+        params = {}
+        grads = {}
 
-            params, grads = {}, {}
-            for i, layer in enumerate(self.layers):
-                if hasattr(layer, "W"):
-                    params[f"W{i}"] = layer.W
-                    grads[f"W{i}"] = layer.dW
+        for i, layer in enumerate(self.layers):
+            if hasattr(layer, "W"):
+                params[f"W{i}"] = layer.W
+                grads[f"W{i}"] = layer.dW
 
-            self.optimizer.update(params, grads)
+                params[f"b{i}"] = layer.b
+                grads[f"b{i}"] = layer.db
 
-            if epoch % 100 == 0:
-                print(f"Epoch {epoch} | Loss {loss:.4f}")
+        self.optimizer.update(params, grads)
